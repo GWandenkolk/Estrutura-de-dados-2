@@ -1,0 +1,539 @@
+using System;
+using System.Collections.Generic;
+
+class Aluno
+{
+    public int Id { get; set; }
+    public string Nome { get; set; }
+    private List<Disciplina> disciplinas = new List<Disciplina>();
+
+    public Aluno(int id, string nome)
+    {
+        this.Id = id;
+        this.Nome = nome;
+    }
+
+    // Verifica se o aluno pode se matricular em uma disciplina
+    public bool PodeMatricular()
+    {
+        return disciplinas.Count < 6;
+    }
+
+    // Matricula o aluno em uma disciplina
+    public bool MatricularDisciplina(Disciplina disciplina)
+    {
+        if (PodeMatricular() && disciplina.MatricularAluno(this))
+        {
+            disciplinas.Add(disciplina);
+            return true;
+        }
+        return false;
+    }
+
+    // Desmatricula o aluno de uma disciplina
+    public bool DesmatricularDisciplina(Disciplina disciplina)
+    {
+        if (disciplinas.Contains(disciplina))
+        {
+            disciplinas.Remove(disciplina);
+            disciplina.DesmatricularAluno(this);
+            return true;
+        }
+        return false;
+    }
+
+    // Lista disciplinas do aluno
+    public void ListarDisciplinas()
+    {
+        Console.WriteLine($"Aluno {Nome} está matriculado nas seguintes disciplinas:");
+        foreach (var disciplina in disciplinas)
+        {
+            Console.WriteLine($"- {disciplina.Descricao}");
+        }
+    }
+}
+
+class Disciplina
+{
+    public int Id { get; set; }
+    public string Descricao { get; set; }
+    private List<Aluno> alunos = new List<Aluno>();
+
+    public Disciplina(int id, string descricao)
+    {
+        this.Id = id;
+        this.Descricao = descricao;
+    }
+
+    // Matricular aluno na disciplina
+    public bool MatricularAluno(Aluno aluno)
+    {
+        if (alunos.Count < 15)
+        {
+            alunos.Add(aluno);
+            return true;
+        }
+        Console.WriteLine("A disciplina já atingiu o número máximo de alunos.");
+        return false;
+    }
+
+    // Desmatricular aluno da disciplina
+    public bool DesmatricularAluno(Aluno aluno)
+    {
+        if (alunos.Contains(aluno))
+        {
+            alunos.Remove(aluno);
+            return true;
+        }
+        return false;
+    }
+
+    // Verifica se a disciplina tem alunos matriculados
+    public bool TemAlunos()
+    {
+        return alunos.Count > 0;
+    }
+
+    // Lista alunos matriculados na disciplina
+    public void ListarAlunos()
+    {
+        Console.WriteLine($"Disciplina {Descricao} tem os seguintes alunos matriculados:");
+        foreach (var aluno in alunos)
+        {
+            Console.WriteLine($"- {aluno.Nome}");
+        }
+    }
+}
+
+class Curso
+{
+    public int Id { get; set; }
+    public string Descricao { get; set; }
+    private List<Disciplina> disciplinas = new List<Disciplina>();
+
+    public Curso(int id, string descricao)
+    {
+        this.Id = id;
+        this.Descricao = descricao;
+    }
+
+    // Adicionar disciplina ao curso
+    public bool AdicionarDisciplina(Disciplina disciplina)
+    {
+        if (disciplinas.Count < 12)
+        {
+            disciplinas.Add(disciplina);
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("O curso já atingiu o número máximo de disciplinas.");
+            return false;
+        }
+    }
+
+    // Pesquisar disciplina no curso
+    public Disciplina PesquisarDisciplina(int id)
+    {
+        return disciplinas.Find(d => d.Id == id);
+    }
+
+    // Remover disciplina do curso, se não tiver alunos matriculados
+    public bool RemoverDisciplina(Disciplina disciplina)
+    {
+        if (!disciplina.TemAlunos())
+        {
+            disciplinas.Remove(disciplina);
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("Não é possível remover a disciplina, pois há alunos matriculados.");
+            return false;
+        }
+    }
+
+    // Listar as disciplinas associadas ao curso
+    public void ListarDisciplinas()
+    {
+        Console.WriteLine($"Curso: {Descricao}");
+        if (disciplinas.Count == 0)
+        {
+            Console.WriteLine("Nenhuma disciplina cadastrada.");
+        }
+        else
+        {
+            Console.WriteLine("Disciplinas:");
+            foreach (var disc in disciplinas)
+            {
+                Console.WriteLine($"- {disc.Descricao}");
+            }
+        }
+    }
+
+    // Verifica se o curso tem disciplinas
+    public bool TemDisciplinas()
+    {
+        return disciplinas.Count > 0;
+    }
+}
+
+class Escola
+{
+    private List<Curso> cursos = new List<Curso>();
+
+    // Adicionar curso à escola
+    public bool AdicionarCurso(Curso curso)
+    {
+        if (cursos.Count < 5)
+        {
+            cursos.Add(curso);
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("A escola já atingiu o número máximo de cursos.");
+            return false;
+        }
+    }
+
+    // Pesquisar curso na escola
+    public Curso PesquisarCurso(int id)
+    {
+        return cursos.Find(c => c.Id == id);
+    }
+
+    // Remover curso da escola, se não tiver disciplinas associadas
+    public bool RemoverCurso(Curso curso)
+    {
+        if (!curso.TemDisciplinas())
+        {
+            cursos.Remove(curso);
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("Não é possível remover o curso, pois há disciplinas associadas.");
+            return false;
+        }
+    }
+
+    // Listar cursos da escola
+    public void ListarCursos()
+    {
+        Console.WriteLine("Cursos disponíveis na escola:");
+        foreach (var curso in cursos)
+        {
+            Console.WriteLine($"- {curso.Descricao}");
+        }
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Escola escola = new Escola();
+        int opcao;
+
+        do
+        {
+            Console.WriteLine("\nMenu:");
+            Console.WriteLine("1. Adicionar curso");
+            Console.WriteLine("2. Pesquisar curso");
+            Console.WriteLine("3. Remover curso");
+            Console.WriteLine("4. Adicionar disciplina no curso");
+            Console.WriteLine("5. Pesquisar disciplina");
+            Console.WriteLine("6. Remover disciplina do curso");
+            Console.WriteLine("7. Matricular aluno na disciplina");
+            Console.WriteLine("8. Remover aluno da disciplina");
+            Console.WriteLine("0. Sair");
+            Console.Write("Escolha uma opção: ");
+
+            // Verifica se a entrada é válida
+            if (!int.TryParse(Console.ReadLine(), out opcao))
+            {
+                Console.WriteLine("Opção inválida. Por favor, insira um número.");
+                continue;
+            }
+
+            switch (opcao)
+            {
+                case 1:
+                    Console.Write("ID do Curso: ");
+                    if (int.TryParse(Console.ReadLine(), out int cursoId))
+                    {
+                        Console.Write("Descrição do Curso: ");
+                        string descricaoCurso = Console.ReadLine();
+                        Curso novoCurso = new Curso(cursoId, descricaoCurso);
+                        escola.AdicionarCurso(novoCurso);
+                    }
+                    else
+                    {
+                        Console.WriteLine("ID inválido. Insira um número.");
+                    }
+                    break;
+
+                case 2:
+                    Console.Write("ID do Curso: ");
+                    if (int.TryParse(Console.ReadLine(), out int cursoPesqId))
+                    {
+                        Curso cursoPesq = escola.PesquisarCurso(cursoPesqId);
+                        if (cursoPesq != null)
+                        {
+                            cursoPesq.ListarDisciplinas();
+                        }
+                        else
+                        {
+                            Console.WriteLine("Curso não encontrado.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("ID inválido. Insira um número.");
+                    }
+                    break;
+
+                case 3:
+                    Console.Write("ID do Curso: ");
+                    if (int.TryParse(Console.ReadLine(), out int cursoRemId))
+                    {
+                        Curso cursoRem = escola.PesquisarCurso(cursoRemId);
+                        if (cursoRem != null && !cursoRem.TemDisciplinas())
+                        {
+                            escola.RemoverCurso(cursoRem);
+                            Console.WriteLine("Curso removido com sucesso.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Curso não encontrado ou contém disciplinas.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("ID inválido. Insira um número.");
+                    }
+                    break;
+
+                case 4:
+                    Console.Write("ID do Curso: ");
+                    if (int.TryParse(Console.ReadLine(), out int cursoDiscId))
+                    {
+                        Curso cursoDisc = escola.PesquisarCurso(cursoDiscId);
+                        if (cursoDisc != null)
+                        {
+                            Console.Write("ID da Disciplina: ");
+                            if (int.TryParse(Console.ReadLine(), out int discId))
+                            {
+                                Console.Write("Descrição da Disciplina: ");
+                                string descricaoDisc = Console.ReadLine();
+                                Disciplina novaDisc = new Disciplina(discId, descricaoDisc);
+                                cursoDisc.AdicionarDisciplina(novaDisc);
+                            }
+                            else
+                            {
+                                Console.WriteLine("ID da Disciplina inválido.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Curso não encontrado.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("ID do Curso inválido.");
+                    }
+                    break;
+
+                case 5:
+                    Console.Write("ID do Curso: ");
+                    if (int.TryParse(Console.ReadLine(), out int cursoPesqDiscId))
+                    {
+                        Curso cursoPesqDisc = escola.PesquisarCurso(cursoPesqDiscId);
+                        if (cursoPesqDisc != null)
+                        {
+                            Console.Write("ID da Disciplina: ");
+                            if (int.TryParse(Console.ReadLine(), out int discPesqId))
+                            {
+                                Disciplina discPesq = cursoPesqDisc.PesquisarDisciplina(discPesqId);
+                                if (discPesq != null)
+                                {
+                                    discPesq.ListarAlunos();
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Disciplina não encontrada.");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("ID da Disciplina inválido.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Curso não encontrado.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("ID do Curso inválido.");
+                    }
+                    break;
+
+                case 6:
+                    Console.Write("ID do Curso: ");
+                    if (int.TryParse(Console.ReadLine(), out int cursoRemDiscId))
+                    {
+                        Curso cursoRemDisc = escola.PesquisarCurso(cursoRemDiscId);
+                        if (cursoRemDisc != null)
+                        {
+                            Console.Write("ID da Disciplina: ");
+                            if (int.TryParse(Console.ReadLine(), out int discRemId))
+                            {
+                                Disciplina discRem = cursoRemDisc.PesquisarDisciplina(discRemId);
+                                if (discRem != null && !discRem.TemAlunos())
+                                {
+                                    cursoRemDisc.RemoverDisciplina(discRem);
+                                    Console.WriteLine("Disciplina removida com sucesso.");
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Disciplina não encontrada ou contém alunos matriculados.");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("ID da Disciplina inválido.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Curso não encontrado.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("ID do Curso inválido.");
+                    }
+                    break;
+
+                case 7:
+                    Console.Write("ID do Curso: ");
+                    if (int.TryParse(Console.ReadLine(), out int cursoMatId))
+                    {
+                        Curso cursoMat = escola.PesquisarCurso(cursoMatId);
+                        if (cursoMat != null)
+                        {
+                            Console.Write("ID da Disciplina: ");
+                            if (int.TryParse(Console.ReadLine(), out int discMatId))
+                            {
+                                Disciplina discMat = cursoMat.PesquisarDisciplina(discMatId);
+                                if (discMat != null)
+                                {
+                                    Console.Write("ID do Aluno: ");
+                                    if (int.TryParse(Console.ReadLine(), out int alunoId))
+                                    {
+                                        Console.Write("Nome do Aluno: ");
+                                        string alunoNome = Console.ReadLine();
+                                        Aluno novoAluno = new Aluno(alunoId, alunoNome);
+                                        if (novoAluno.PodeMatricular() && discMat.MatricularAluno(novoAluno))
+                                        {
+                                            Console.WriteLine("Aluno matriculado com sucesso.");
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine("Aluno não pode ser matriculado (limite atingido ou erro).");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("ID do Aluno inválido.");
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Disciplina não encontrada.");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("ID da Disciplina inválido.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Curso não encontrado.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("ID do Curso inválido.");
+                    }
+                    break;
+
+                case 8:
+                    Console.Write("ID do Curso: ");
+                    if (int.TryParse(Console.ReadLine(), out int cursoDesmatId))
+                    {
+                        Curso cursoDesmat = escola.PesquisarCurso(cursoDesmatId);
+                        if (cursoDesmat != null)
+                        {
+                            Console.Write("ID da Disciplina: ");
+                            if (int.TryParse(Console.ReadLine(), out int discDesmatId))
+                            {
+                                Disciplina discDesmat = cursoDesmat.PesquisarDisciplina(discDesmatId);
+                                if (discDesmat != null)
+                                {
+                                    Console.Write("ID do Aluno: ");
+                                    if (int.TryParse(Console.ReadLine(), out int alunoDesmatId))
+                                    {
+                                        Aluno alunoDesmat = new Aluno(alunoDesmatId, "");
+                                        if (discDesmat.DesmatricularAluno(alunoDesmat))
+                                        {
+                                            Console.WriteLine("Aluno desmatriculado com sucesso.");
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine("Aluno não encontrado na disciplina.");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("ID do Aluno inválido.");
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Disciplina não encontrada.");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("ID da Disciplina inválido.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Curso não encontrado.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("ID do Curso inválido.");
+                    }
+                    break;
+
+                case 0:
+                    Console.WriteLine("Saindo...");
+                    break;
+
+                default:
+                    Console.WriteLine("Opção inválida.");
+                    break;
+            }
+
+        } while (opcao != 0);
+    }
+}
