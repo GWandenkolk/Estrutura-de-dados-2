@@ -1,0 +1,268 @@
+using System;
+using System.Collections.Generic;
+
+class Venda
+{
+    public int Qtde { get; set; }
+    public double Valor { get; set; }
+
+    public Venda(int qtde, double valor)
+    {
+        this.Qtde = qtde;
+        this.Valor = valor;
+    }
+
+    // Método para calcular o valor médio da venda
+    public double ValorMedio()
+    {
+        return Qtde > 0 ? Valor / Qtde : 0;
+    }
+}
+
+class Vendedor
+{
+    public int Id { get; set; }
+    public string Nome { get; set; }
+    public double PercComissao { get; set; }
+    private Venda[] AsVendas = new Venda[31]; // Armazena as vendas dos 31 dias
+
+    public Vendedor(int id, string nome, double percComissao)
+    {
+        this.Id = id;
+        this.Nome = nome;
+        this.PercComissao = percComissao;
+    }
+
+    // Registrar uma venda em um determinado dia
+    public void RegistrarVenda(int dia, Venda venda)
+    {
+        if (dia < 1 || dia > 31)
+            throw new ArgumentException("Dia inválido.");
+        AsVendas[dia - 1] = venda;
+    }
+
+    // Calcula o valor total de vendas
+    public double ValorVendas()
+    {
+        double total = 0;
+        foreach (var venda in AsVendas)
+        {
+            if (venda != null)
+                total += venda.Valor;
+        }
+        return total;
+    }
+
+    // Calcula o valor da comissão com base nas vendas e na percentagem de comissão
+    public double ValorComissao()
+    {
+        return ValorVendas() * PercComissao / 100;
+    }
+
+    // Calcula o valor médio das vendas realizadas
+    public double ValorMedioVendas()
+    {
+        double totalValor = 0;
+        int diasComVendas = 0;
+
+        foreach (var venda in AsVendas)
+        {
+            if (venda != null)
+            {
+                totalValor += venda.Valor;
+                diasComVendas++;
+            }
+        }
+
+        return diasComVendas > 0 ? totalValor / diasComVendas : 0;
+    }
+
+    // Verifica se o vendedor tem alguma venda registrada
+    public bool TemVendas()
+    {
+        foreach (var venda in AsVendas)
+        {
+            if (venda != null)
+                return true;
+        }
+        return false;
+    }
+}
+
+class Vendedores
+{
+    private List<Vendedor> osVendedores = new List<Vendedor>();
+    private const int Max = 10;
+
+    // Adicionar um vendedor à lista, verificando o limite
+    public bool AddVendedor(Vendedor v)
+    {
+        if (osVendedores.Count < Max)
+        {
+            osVendedores.Add(v);
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("Limite de vendedores atingido.");
+            return false;
+        }
+    }
+
+    // Remover um vendedor da lista se ele não tiver vendas registradas
+    public bool DelVendedor(Vendedor v)
+    {
+        if (!v.TemVendas())
+        {
+            osVendedores.Remove(v);
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("Não é possível excluir o vendedor pois há vendas registradas.");
+            return false;
+        }
+    }
+
+    // Procurar um vendedor pelo ID
+    public Vendedor SearchVendedor(int id)
+    {
+        return osVendedores.Find(v => v.Id == id);
+    }
+
+    // Calcula o valor total de vendas de todos os vendedores
+    public double ValorVendas()
+    {
+        double total = 0;
+        foreach (var v in osVendedores)
+        {
+            total += v.ValorVendas();
+        }
+        return total;
+    }
+
+    // Calcula o valor total de comissão de todos os vendedores
+    public double ValorComissao()
+    {
+        double total = 0;
+        foreach (var v in osVendedores)
+        {
+            total += v.ValorComissao();
+        }
+        return total;
+    }
+
+    // Listar todos os vendedores e seus dados
+    public void ListarVendedores()
+    {
+        Console.WriteLine("ID\tNome\tTotal Vendas\tComissão");
+        foreach (var v in osVendedores)
+        {
+            Console.WriteLine($"{v.Id}\t{v.Nome}\t{v.ValorVendas():C}\t{v.ValorComissao():C}");
+        }
+
+        Console.WriteLine($"\nTotal Vendas: {ValorVendas():C}");
+        Console.WriteLine($"Total Comissão: {ValorComissao():C}");
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Vendedores vendedores = new Vendedores();
+        int opcao;
+
+        do
+        {
+            Console.WriteLine("\nOpções:");
+            Console.WriteLine("0. Sair");
+            Console.WriteLine("1. Cadastrar vendedor");
+            Console.WriteLine("2. Consultar vendedor");
+            Console.WriteLine("3. Excluir vendedor");
+            Console.WriteLine("4. Registrar venda");
+            Console.WriteLine("5. Listar vendedores");
+            Console.Write("Escolha uma opção: ");
+            opcao = int.Parse(Console.ReadLine());
+
+            switch (opcao)
+            {
+                case 1:
+                    Console.Write("ID do Vendedor: ");
+                    int id = int.Parse(Console.ReadLine());
+                    Console.Write("Nome do Vendedor: ");
+                    string nome = Console.ReadLine();
+                    Console.Write("Percentual de Comissão: ");
+                    double percComissao = double.Parse(Console.ReadLine());
+                    Vendedor v = new Vendedor(id, nome, percComissao);
+                    vendedores.AddVendedor(v);
+                    break;
+
+                case 2:
+                    Console.Write("ID do Vendedor: ");
+                    int consultaId = int.Parse(Console.ReadLine());
+                    Vendedor vEncontrado = vendedores.SearchVendedor(consultaId);
+                    if (vEncontrado != null)
+                    {
+                        Console.WriteLine($"ID: {vEncontrado.Id}");
+                        Console.WriteLine($"Nome: {vEncontrado.Nome}");
+                        Console.WriteLine($"Valor Total de Vendas: {vEncontrado.ValorVendas():C}");
+                        Console.WriteLine($"Comissão: {vEncontrado.ValorComissao():C}");
+                        Console.WriteLine($"Valor Médio de Vendas: {vEncontrado.ValorMedioVendas():C}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Vendedor não encontrado.");
+                    }
+                    break;
+
+                case 3:
+                    Console.Write("ID do Vendedor: ");
+                    int excluirId = int.Parse(Console.ReadLine());
+                    Vendedor vExcluir = vendedores.SearchVendedor(excluirId);
+                    if (vExcluir != null)
+                    {
+                        vendedores.DelVendedor(vExcluir);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Vendedor não encontrado.");
+                    }
+                    break;
+
+                case 4:
+                    Console.Write("ID do Vendedor: ");
+                    int vendaId = int.Parse(Console.ReadLine());
+                    Vendedor vendedorVenda = vendedores.SearchVendedor(vendaId);
+                    if (vendedorVenda != null)
+                    {
+                        Console.Write("Dia da venda: ");
+                        int dia = int.Parse(Console.ReadLine());
+                        Console.Write("Quantidade de itens vendidos: ");
+                        int qtde = int.Parse(Console.ReadLine());
+                        Console.Write("Valor da venda: ");
+                        double valor = double.Parse(Console.ReadLine());
+                        Venda venda = new Venda(qtde, valor);
+                        vendedorVenda.RegistrarVenda(dia, venda);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Vendedor não encontrado.");
+                    }
+                    break;
+
+                case 5:
+                    vendedores.ListarVendedores();
+                    break;
+
+                case 0:
+                    Console.WriteLine("Saindo...");
+                    break;
+
+                default:
+                    Console.WriteLine("Opção inválida.");
+                    break;
+            }
+        } while (opcao != 0);
+    }
+}
